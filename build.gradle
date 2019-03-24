@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'org.beryx.jlink' version '2.6.6'
+    id 'com.google.cloud.tools.jib' version '1.0.2'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Project config
+version '1.0'
+
+// Java config
+sourceCompatibility = 11.0
+targetCompatibility = 11.0
+mainClassName = 'app.Main'
+
+jib {
+    from {
+        // If you plan on staying in JDK 11 this is probably your best bet
+        // Read up: https://hub.docker.com/r/alkoclick/alpine-jdk11-nojdk
+        image = 'alkoclick/alpine-jdk11-nojdk'
+    }
+    to {
+        image = 'arzu/microservice'
+    }
+    container {
+        entrypoint = "$rootProject.name/bin/$rootProject.name"
+        useCurrentTimestamp = true
+    }
+    extraDirectory {
+        path = file("$buildDir/image")
+        permissions = [
+                ("/$rootProject.name/bin/$rootProject.name".toString()): '755',
+                ("/$rootProject.name/bin/java".toString())             : '755'
+        ]
+    }
+}
+
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = rootProject.name
+    }
+    imageDir = file("$buildDir/image/$rootProject.name")
+}
