@@ -11,11 +11,17 @@ repositories {
 // Project config
 version '1.0'
 
+// Test using the generated java runtime (Do I need to explain why this is a good idea?)
+test.executable = "$buildDir/image/$rootProject.name/bin/java"
+// We need to put this in quotes so Gradle doesn't mistake it for the plugin declaration
+test.dependsOn "jlink"
+
 // Java config
 sourceCompatibility = 11.0
 targetCompatibility = 11.0
 mainClassName = 'app.Main'
 
+// Use: jibBuild and jibDockerBuild
 jib {
     from {
         // If you plan on staying in JDK 11 this is probably your best bet
@@ -38,6 +44,7 @@ jib {
     }
 }
 
+// Use: 
 jlink {
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
     launcher {
